@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  SiteWatch — Website Security Intelligence                   ║
+  ║                                                              ║
+  ║  HOW TO USE:                                                 ║
+  ║  1. Open index.html in any browser                           ║
+  ║  2. Type any website URL and hit SCAN                        ║
+  ║                                                              ║
+  ║  No API keys. No accounts. Completely free.                  ║
+  ║                                                              ║
+  ║  DATA SOURCES:                                               ║
+  ║  - URLScan.io  (live tracker / IP / script scanning)         ║
+  ║  - RDAP/WHOIS  (domain age, registrar, country)              ║
+  ║  - Curated knowledge base  (kb.js — 15+ well-known sites)    ║
+  ║                                                              ║
+  ║  FILE STRUCTURE:                                             ║
+  ║  index.html   — page structure (this file)                   ║
+  ║  css/style.css — all visual styles                           ║
+  ║  js/kb.js      — knowledge base (breach data, site history)  ║
+  ║  js/scoring.js — safety score calculation engine             ║
+  ║  js/scan.js    — URLScan + RDAP live data fetching           ║
+  ║  js/render.js  — builds and displays the report UI           ║
+  ║  js/ui.js      — tabs, settings, whitelist, helpers          ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SiteWatch — Website Security Intelligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ── NAVIGATION ─────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-logo">
+    <div class="icon">🛡</div>
+    Site<span>Watch</span>
+  </div>
+  <div class="nav-links">
+    <div class="nav-link active">Scanner</div>
+    <div class="nav-link" onclick="openSettings()">⚙ Settings</div>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ── HERO / SEARCH ──────────────────────────────────────────── -->
+  <div class="hero" id="heroSection">
+    <div class="hero-tag">FREE · NO ACCOUNTS · NO API KEYS</div>
+    <h1>Know the <em>real history</em><br>of any website</h1>
+    <p class="hero-sub">
+      Live technical scan + curated breach database for major sites.
+      Zero API keys required.
+    </p>
+
+    <div class="search-wrap">
+      <div class="search-bar">
+        <span style="color:var(--muted)">🔍</span>
+        <input type="text" id="urlInput" placeholder="paste any website URL…" />
+        <button class="scan-btn" id="scanBtn" onclick="startScan()">RUN SCAN</button>
+      </div>
+      <div class="search-hints">
+        <span class="hint-chip" onclick="fillUrl('wish.com')">wish.com</span>
+        <span class="hint-chip" onclick="fillUrl('temu.com')">temu.com</span>
+        <span class="hint-chip" onclick="fillUrl('facebook.com')">facebook.com</span>
+        <span class="hint-chip" onclick="fillUrl('amazon.com')">amazon.com</span>
+        <span class="hint-chip" onclick="fillUrl('aliexpress.com')">aliexpress.com</span>
+        <span class="hint-chip" onclick="fillUrl('tiktok.com')">tiktok.com</span>
+      </div>
+    </div>
+
+    <!-- Scan log — populated by scan.js -->
+    <div class="loading-state" id="loadingState">
+      <div class="loading-log" id="loadingLog"></div>
+    </div>
+  </div>
+
+  <!-- ── RESULTS ────────────────────────────────────────────────── -->
+  <div class="results-section" id="resultsSection">
+
+    <!-- Data source badges (e.g. "LIVE: URLScan.io") -->
+    <div class="live-sources" id="sourceBadges"></div>
+
+    <!-- Five-stat strip -->
+    <div class="stat-strip">
+      <div class="stat-item"><div class="stat-val" id="statBreaches">—</div><div class="stat-label">Known Breaches</div></div>
+      <div class="stat-item"><div class="stat-val" id="statRecords">—</div><div class="stat-label">Records Exposed</div></div>
+      <div class="stat-item"><div class="stat-val" id="statTrackers">—</div><div class="stat-label">Trackers Detected</div></div>
+      <div class="stat-item"><div class="stat-val" id="statAge">—</div><div class="stat-label">Domain Age</div></div>
+      <div class="stat-item"><div class="stat-val" id="statShared">—</div><div class="stat-label">Data Partners</div></div>
+    </div>
+
+    <!-- URLScan screenshot (injected by render.js if available) -->
+    <div id="urlscanShot"></div>
+
+    <!-- Score header -->
+    <div class="report-header" id="reportHeader">
+      <div class="score-ring">
+        <svg viewBox="0 0 88 88">
+          <circle class="ring-bg" cx="44" cy="44" r="35"/>
+          <circle class="ring-fill" id="scoreRing" cx="44" cy="44" r="35"/>
+        </svg>
+        <div class="score-num">
+          <span id="scoreNum">—</span>
+          <small>/100</small>
+        </div>
+      </div>
+      <div class="report-meta">
+        <div class="report-url" id="reportUrl">—</div>
+        <div class="report-verdict" id="reportVerdict">—</div>
+        <div class="report-tags" id="reportTags"></div>
+      </div>
+      <div class="report-actions">
+        <button class="action-btn" id="autoSaveBtn" onclick="toggleAutoSave()">
+          💾 Auto-save: <span id="autoSaveStatus">OFF</span>
+        </button>
+        <button class="action-btn" id="whitelistBtn" onclick="addToWhitelist()">
+          ✓ Add to Safe List
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active"       onclick="switchTab('timeline')">📅 Breach Timeline <span class="tab-badge" id="breachBadge">0</span></div>
+      <div class="tab"              onclick="switchTab('domain')">🌐 Domain Info</div>
+      <div class="tab"              onclick="switchTab('data')">🗂 Data Collection</div>
+      <div class="tab"              onclick="switchTab('ecommerce')">🛒 Purchase Safety</div>
+      <div class="tab"              onclick="switchTab('tech')">🔧 Under the Hood</div>
+      <div class="tab"              onclick="switchTab('alternatives')">🔄 Safe Alternatives</div>
+      <div class="tab"              onclick="switchTab('scoring')">📊 Score Breakdown</div>
+    </div>
+
+    <!-- Tab panels -->
+    <div class="tab-panel active" id="panel-timeline">
+      <div class="card">
+        <div class="card-title">Security History Timeline</div>
+        <div class="timeline" id="timelineContent"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-domain">
+      <div class="domain-info-strip" id="domainInfoStrip"></div>
+      <div class="card">
+        <div class="card-title">Domain Intelligence</div>
+        <div id="domainDetail"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-data">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">What They Collect</div>
+          <div id="dataCollectionContent"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Who They Share With</div>
+          <div class="share-list" id="dataSharingContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-ecommerce">
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Purchase Safety Overview</div>
+        <div class="ecom-scores" id="ecomScores"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Complaints & Reports</div>
+        <div class="complaints-list" id="complaintsList"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-tech">
+      <div class="card">
+        <div class="card-title">Technical Analysis — Plain English</div>
+        <div class="tech-items" id="techContent"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-alternatives">
+      <div class="card">
+        <div class="card-title">Safer Alternatives</div>
+        <div class="alt-grid" id="altGrid"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-scoring">
+      <div class="card">
+        <div class="card-title">How This Score Was Calculated</div>
+        <div id="scoreBreakdownContent"></div>
+      </div>
+    </div>
+
+  </div><!-- /results-section -->
+</main>
+
+<!-- ── SETTINGS PANEL ─────────────────────────────────────────── -->
+<div class="settings-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-panel">
+    <div class="settings-title">
+      Settings
+      <div class="settings-close" onclick="closeSettings()">✕</div>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-info">
+        <div class="setting-name">Auto-Save Reports</div>
+        <div class="setting-desc">Save scan results so you don't get a new report every time for the same site.</div>
+      </div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-info">
+        <div class="setting-name">Background Monitoring</div>
+        <div class="setting-desc">Alert you if new breaches are found for saved sites.</div>
+      </div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-info">
+        <div class="setting-name">Show Safe Alternatives</div>
+        <div class="setting-desc">Recommend safer alternatives when a risky site is detected.</div>
+      </div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+    </div>
+
+    <!-- Safe list -->
+    <div class="whitelist-section">
+      <div class="whitelist-title">SAFE LIST — SKIP REPORTS FOR THESE SITES</div>
+      <div class="whitelist-add">
+        <input type="text" id="whitelistInput" placeholder="e.g. mybank.com" />
+        <div class="add-btn" onclick="addWhitelistItem()">+ ADD</div>
+      </div>
+      <div class="whitelist-tags" id="whitelistTags"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCRIPTS (order matters) ───────────────────────────────── -->
+<script src="js/kb.js"></script>       <!-- knowledge base data      -->
+<script src="js/scoring.js"></script>  <!-- score calculation engine  -->
+<script src="js/scan.js"></script>     <!-- URLScan + RDAP fetching   -->
+<script src="js/render.js"></script>   <!-- builds report UI          -->
+<script src="js/ui.js"></script>       <!-- tabs, settings, helpers   -->
+
+</body>
+</html>
