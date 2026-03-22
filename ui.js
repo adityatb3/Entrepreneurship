@@ -134,9 +134,12 @@ function fillUrl(url) {
   document.getElementById('urlInput').value = url;
 }
 
-// Allow pressing Enter to trigger a scan
+// Allow pressing Enter to trigger a scan; clear error on any keystroke
 document.getElementById('urlInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') startScan();
+});
+document.getElementById('urlInput').addEventListener('input', () => {
+  clearInputError();
 });
 
 

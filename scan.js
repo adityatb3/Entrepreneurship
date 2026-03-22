@@ -68,19 +68,104 @@ function updateLog(line, label, value, isError = false) {
 }
 
 
+// ── URL validation ────────────────────────────────────────────────
+// Accepts anything a human would reasonably type:
+//   example.com  |  www.example.com  |  https://example.com/path
+// Rejects: empty, plain words, IP addresses, localhost, strings
+//          with spaces, and anything without a valid TLD.
+
+function validateAndNormalize(raw) {
+  const input = raw.trim();
+
+  if (!input) {
+    return { error: 'Please enter a website URL.' };
+  }
+
+  // Strip protocol and www, isolate the hostname
+  const stripped = input
+    .replace(/^https?:\/\//i, '')
+    .replace(/^ftp:\/\//i, '')
+    .replace(/^www\./i, '')
+    .split('/')[0]       // drop any path
+    .split('?')[0]       // drop any query string
+    .split('#')[0]       // drop any hash
+    .toLowerCase()
+    .trim();
+
+  // Must not contain spaces
+  if (/\s/.test(stripped)) {
+    return { error: 'That doesn\'t look like a URL. Did you mean to search for a website domain?' };
+  }
+
+  // Must not be an IP address (IPv4)
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(stripped)) {
+    return { error: 'IP addresses are not supported — please enter a domain name (e.g. example.com).' };
+  }
+
+  // Must not be localhost or similar
+  if (/^localhost(:\d+)?$/.test(stripped) || stripped === '127.0.0.1') {
+    return { error: 'Local addresses can\'t be scanned.' };
+  }
+
+  // Must look like a domain: at least one dot, no invalid characters,
+  // and a TLD of at least 2 characters
+  const domainPattern = /^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?)*\.[a-z]{2,}$/;
+  if (!domainPattern.test(stripped)) {
+    return { error: `"${stripped}" doesn't look like a valid domain. Try something like: amazon.com or https://example.com` };
+  }
+
+  return { domain: stripped };
+}
+
+function showInputError(message) {
+  const input  = document.getElementById('urlInput');
+  const wrap   = input.closest('.search-bar');
+
+  // Shake the search bar
+  wrap.style.borderColor = 'var(--red)';
+  wrap.style.boxShadow   = '0 0 0 3px rgba(255,77,109,.15)';
+
+  // Show error message below the bar
+  let errEl = document.getElementById('urlError');
+  if (!errEl) {
+    errEl = document.createElement('div');
+    errEl.id = 'urlError';
+    errEl.style.cssText = 'color:var(--red);font-family:var(--mono);font-size:12px;margin-top:10px;text-align:left;padding:0 4px;';
+    wrap.parentNode.insertBefore(errEl, wrap.nextSibling);
+  }
+  errEl.textContent = '⚠ ' + message;
+
+  // Clear the error styling after 4 seconds
+  setTimeout(() => {
+    wrap.style.borderColor = '';
+    wrap.style.boxShadow   = '';
+    if (errEl) errEl.textContent = '';
+  }, 4000);
+}
+
+function clearInputError() {
+  const wrap = document.getElementById('urlInput')?.closest('.search-bar');
+  if (wrap) { wrap.style.borderColor = ''; wrap.style.boxShadow = ''; }
+  const errEl = document.getElementById('urlError');
+  if (errEl) errEl.textContent = '';
+}
+
+
 // ── Main entry point ──────────────────────────────────────────────
 // Called by the Scan button in index.html.
 
 async function startScan() {
-  const raw = document.getElementById('urlInput').value.trim();
-  if (!raw) return;
+  const raw = document.getElementById('urlInput').value;
 
-  // Normalise to bare domain (strip protocol, www, path)
-  const domain = raw
-    .replace(/^https?:\/\//, '')
-    .replace(/^www\./, '')
-    .split('/')[0]
-    .toLowerCase();
+  // Validate before doing anything else
+  const result = validateAndNormalize(raw);
+  if (result.error) {
+    showInputError(result.error);
+    return;
+  }
+  clearInputError();
+
+  const domain = result.domain;
 
   // Whitelist check — skip scan for trusted sites
   if (whitelist.includes(domain)) {
