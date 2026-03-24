@@ -13,30 +13,22 @@
  */
 
 
-// ── Shared state ──────────────────────────────────────────────────
-
 let autoSave    = false;
-let currentSite = null;  // set by scan.js when a scan starts
-
-// Safe list persisted to localStorage
+let currentSite = null;  
 let whitelist = JSON.parse(localStorage.getItem('sw_whitelist') || '["gmail.com","github.com"]');
 
 
-// ── Tab switching ─────────────────────────────────────────────────
 
 const TAB_NAMES = ['timeline', 'domain', 'data', 'ecommerce', 'tech', 'alternatives', 'scoring'];
 
 function switchTab(name) {
-  // Deactivate all tabs and panels
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
 
-  // Activate the selected one
   const index = TAB_NAMES.indexOf(name);
   document.querySelectorAll('.tab')[index].classList.add('active');
   document.getElementById('panel-' + name).classList.add('active');
 
-  // Re-trigger bar animations when switching to the sharing tab
   if (name === 'data') {
     setTimeout(() => {
       document.querySelectorAll('.share-bar').forEach(b => b.style.width = b.dataset.pct);
@@ -45,13 +37,11 @@ function switchTab(name) {
 }
 
 
-// ── Settings panel ────────────────────────────────────────────────
 
 function openSettings()  { document.getElementById('settingsOverlay').classList.add('open'); }
 function closeSettings() { document.getElementById('settingsOverlay').classList.remove('open'); }
 
 
-// ── Auto-save toggle ──────────────────────────────────────────────
 
 function toggleAutoSave() {
   autoSave = !autoSave;
@@ -66,7 +56,6 @@ function updateAutoSaveBtn() {
 }
 
 
-// ── Safe list (whitelist) ─────────────────────────────────────────
 
 function addToWhitelist() {
   if (!currentSite || whitelist.includes(currentSite)) return;
@@ -114,7 +103,6 @@ function renderWhitelistTags() {
     </div>`).join('');
 }
 
-// Show a brief notice instead of running a scan for whitelisted sites
 function showWhitelistNotice(domain) {
   const loadingEl = document.getElementById('loadingState');
   document.getElementById('loadingLog').innerHTML = `
@@ -127,14 +115,11 @@ function showWhitelistNotice(domain) {
 }
 
 
-// ── URL input helpers ─────────────────────────────────────────────
 
-// Called by the hint chips below the search bar
 function fillUrl(url) {
   document.getElementById('urlInput').value = url;
 }
 
-// Allow pressing Enter to trigger a scan; clear error on any keystroke
 document.getElementById('urlInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') startScan();
 });
@@ -143,6 +128,4 @@ document.getElementById('urlInput').addEventListener('input', () => {
 });
 
 
-// ── Init ──────────────────────────────────────────────────────────
-// Render the saved whitelist tags when the page first loads.
 renderWhitelistTags();

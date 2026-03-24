@@ -1,33 +1,14 @@
 /**
- * kb.js — SiteWatch Knowledge Base
- *
- * Contains curated security data for well-known sites.
- * Sources used to build this data:
  *   - HaveIBeenPwned public breach list (haveibeenpwned.com)
  *   - FTC enforcement actions (ftc.gov/enforcement)
  *   - Privacy Rights Clearinghouse (privacyrights.org)
  *   - EU GDPR enforcement tracker (enforcementtracker.com)
  *   - Public news and court records
- *
- * To add a new site, copy the template at the bottom of this file
- * and fill in the fields. The site key must be the bare domain
- * (e.g. 'example.com' not 'https://www.example.com').
- *
- * Each entry has:
- *   tags          — short labels shown in the report header
- *   stats         — summary numbers for the stat strip
- *   timeline      — chronological list of security incidents
- *   dataCollection — what the site collects, grouped by category
- *   dataSharing   — who they share data with + estimated reach %
- *   ecom          — purchase safety (set isEcommerce: false if N/A)
- *   tech          — plain-English technical explanations
- *   alternatives  — safer recommended alternatives
- *   signals       — raw inputs consumed by scoring.js
  */
 
 const KB = {
 
-  // ── wish.com ──────────────────────────────────────────────────
+  // wish.com 
   'wish.com': {
     tags: [
       'rtag-red|Major Data Breaches',
@@ -68,24 +49,24 @@ const KB = {
         { val: '14K+',   label: 'FTC Complaints',        color: '#ff4d6d' },
       ],
       complaints: [
-        { icon: '💳', title: 'Unauthorized card charges post-purchase',  count: '3,241 reports', period: 'Last 12 months' },
-        { icon: '📦', title: 'Items never delivered, no refund',          count: '6,188 reports', period: 'Last 12 months' },
-        { icon: '⚠️', title: 'Counterfeit or dangerous products',         count: '2,890 reports', period: 'Last 12 months' },
+        {title: 'Unauthorized card charges post-purchase',  count: '3,241 reports', period: 'Last 12 months' },
+        {title: 'Items never delivered, no refund',          count: '6,188 reports', period: 'Last 12 months' },
+        {title: 'Counterfeit or dangerous products',         count: '2,890 reports', period: 'Last 12 months' },
       ],
     },
     tech: [
       { raw: 'wish.com → CloudFlare → 58.220.x.x (Nanjing, CN)', type: 'IP Route',
         title: 'Your data routes through China',
         explain: 'Traffic travels through servers in Nanjing, China. Chinese law requires companies to share data with the government on request, with no obligation to notify users.',
-        risk: '⚠️ Data subject to Chinese government access laws.' },
+        risk: 'Data subject to Chinese government access laws.' },
       { raw: 'META_PIXEL + TikTok Pixel + Criteo OneTag', type: 'Trackers',
         title: 'Three major ad trackers running simultaneously',
         explain: 'Facebook, TikTok, and Criteo trackers all load on every page visit, sending your browsing and purchase behavior to three separate advertising platforms.',
-        risk: '⚠️ Your shopping behavior is shared with Facebook, TikTok, and Criteo.' },
+        risk: 'Your shopping behavior is shared with Facebook, TikTok, and Criteo.' },
       { raw: 'navigator.geolocation.getCurrentPosition() on page load', type: 'Script',
         title: 'Site requests GPS location without user action',
         explain: 'A script requests your precise location automatically on page load, before you take any action or are asked for consent.',
-        risk: '🔴 Unsolicited location access — used for ad targeting.' },
+        risk: 'Unsolicited location access — used for ad targeting.' },
     ],
     alternatives: [
       { name: 'Etsy',   desc: 'Handmade & unique goods from vetted independent sellers with strong buyer protection.', why: 'Better refund policy, vetted sellers, US data handling', score: 87 },
@@ -110,7 +91,7 @@ const KB = {
     },
   },
 
-  // ── temu.com ──────────────────────────────────────────────────
+  // temu.com 
   'temu.com': {
     tags: [
       'rtag-red|Data Sent to China',
@@ -149,20 +130,20 @@ const KB = {
         { val: '8K+',    label: 'Consumer Complaints',   color: '#ff4d6d' },
       ],
       complaints: [
-        { icon: '📱', title: 'App requesting excessive device permissions', count: 'Widespread reports',  period: '2023–2024' },
-        { icon: '💳', title: 'Unexpected charges after purchase',           count: '2,100+ reports',     period: 'Last 12 months' },
-        { icon: '📦', title: 'Poor quality or counterfeit goods',           count: '3,800+ reports',     period: 'Last 12 months' },
+        {title: 'App requesting excessive device permissions', count: 'Widespread reports',  period: '2023–2024' },
+        {title: 'Unexpected charges after purchase',           count: '2,100+ reports',     period: 'Last 12 months' },
+        {title: 'Poor quality or counterfeit goods',           count: '3,800+ reports',     period: 'Last 12 months' },
       ],
     },
     tech: [
       { raw: 'App reads clipboard, contacts, camera without clear purpose', type: 'Permissions',
         title: 'App collects far more data than needed for shopping',
         explain: 'Security researchers found Temu\'s app reads your clipboard (passwords, copied text), accesses contacts, and requests camera/mic access — none of which are needed for shopping.',
-        risk: '🔴 Classified as potential spyware behavior by Arkansas Attorney General.' },
+        risk: 'Classified as potential spyware behavior by Arkansas Attorney General.' },
       { raw: 'Data transmitted to PDD Holdings servers in Shanghai', type: 'IP Route',
         title: 'Your data flows to parent company servers in China',
         explain: 'Temu is owned by PDD Holdings, headquartered in Shanghai. All data collected by the app flows to servers in China, subject to Chinese national security laws.',
-        risk: '🔴 Chinese law mandates data access for government on request.' },
+        risk: 'Chinese law mandates data access for government on request.' },
     ],
     alternatives: [
       { name: 'Amazon', desc: 'US-based, strict seller policies, established security practices.', why: 'US data jurisdiction, established privacy practices', score: 81 },
@@ -183,7 +164,7 @@ const KB = {
     },
   },
 
-  // ── facebook.com ──────────────────────────────────────────────
+  // facebook.com 
   'facebook.com': {
     tags: [
       'rtag-red|Multiple Massive Breaches',
@@ -225,24 +206,24 @@ const KB = {
         { val: '87M',  label: 'Cambridge Analytica Victims',    color: '#ff4d6d' },
       ],
       complaints: [
-        { icon: '🕵️', title: 'Account hijacked after credential breach',       count: '8,291 reports', period: 'Last 12 months' },
-        { icon: '📊', title: 'Political profiling without consent',             count: '87M affected',  period: '2018' },
-        { icon: '🔔', title: 'Security phone number used for ad targeting',     count: 'FTC documented', period: '2019' },
+        {title: 'Account hijacked after credential breach',       count: '8,291 reports', period: 'Last 12 months' },
+        {title: 'Political profiling without consent',             count: '87M affected',  period: '2018' },
+        {title: 'Security phone number used for ad targeting',     count: 'FTC documented', period: '2019' },
       ],
     },
     tech: [
       { raw: 'fbevents.js running on 3M+ external websites', type: 'Tracker',
         title: 'Facebook watches you across most of the internet',
         explain: 'Even when not on Facebook, their tracking pixel runs on millions of other sites. Every visit to those sites sends data back to Facebook, building a complete profile of your internet activity.',
-        risk: '🔴 Facebook knows what you browse even when you are not logged in.' },
+        risk: 'Facebook knows what you browse even when you are not logged in.' },
       { raw: 'Real-Time Bidding: 10,000+ advertisers bid on your profile in <200ms', type: 'Ad System',
         title: 'Your profile is auctioned to advertisers on every page load',
         explain: 'In milliseconds, thousands of advertisers bid to show you their ad based on profiles of your interests, income bracket, and political leanings.',
-        risk: '⚠️ Thousands of companies see your profile data in every ad auction.' },
+        risk: 'Thousands of companies see your profile data in every ad auction.' },
       { raw: 'canvas, webGL, audio context, font fingerprinting active', type: 'Fingerprinting',
         title: 'You can be identified even when logged out or in private mode',
         explain: 'Facebook identifies you using hundreds of tiny browser details that combine into a unique fingerprint, bypassing cookies, logout, and private browsing.',
-        risk: '⚠️ Logging out does not stop Facebook from tracking you.' },
+        risk: 'Logging out does not stop Facebook from tracking you.' },
     ],
     alternatives: [
       { name: 'Mastodon', desc: 'Open-source, federated social network. No ads, no data harvesting, community-run.', why: 'No advertising model, you own your data', score: 91 },
@@ -266,7 +247,7 @@ const KB = {
     },
   },
 
-  // ── amazon.com ────────────────────────────────────────────────
+  //  amazon.com
   'amazon.com': {
     tags: [
       'rtag-yellow|Data Collection at Scale',
@@ -302,19 +283,19 @@ const KB = {
         { val: 'Low',    label: 'Fraud Rate',            color: '#00e5a0' },
       ],
       complaints: [
-        { icon: '📦', title: 'Third-party seller quality / counterfeit issues', count: 'Ongoing',      period: 'All time' },
-        { icon: '🔒', title: 'Account takeover via phishing',                    count: 'Common vector', period: 'All time' },
+        {title: 'Third-party seller quality / counterfeit issues', count: 'Ongoing',      period: 'All time' },
+        { title: 'Account takeover via phishing',                    count: 'Common vector', period: 'All time' },
       ],
     },
     tech: [
       { raw: 'Amazon Advertising pixel + multiple AWS tracking calls', type: 'Trackers',
         title: 'Amazon tracks you extensively for its ad network',
         explain: 'Amazon runs its own advertising network and tracks browsing behavior extensively — not just on Amazon.com but across many other websites that use Amazon Ads.',
-        risk: '⚠️ Amazon\'s ad data is one of the most comprehensive consumer profiles in existence.' },
+        risk: 'Amazon\'s ad data is one of the most comprehensive consumer profiles in existence.' },
       { raw: 'Alexa device recordings stored server-side', type: 'Device',
         title: 'Alexa records and stores your voice commands',
         explain: 'If you own an Alexa device, Amazon stores recordings of your voice commands on their servers. Some recordings have been reviewed by employees.',
-        risk: '⚠️ Voice recordings are retained unless manually deleted in the app.' },
+        risk: 'Voice recordings are retained unless manually deleted in the app.' },
     ],
     alternatives: [
       { name: 'eBay',       desc: 'Strong buyer protections, wide selection, established marketplace.', why: 'Strong Money Back Guarantee',              score: 72 },
@@ -336,7 +317,7 @@ const KB = {
     },
   },
 
-  // ── tiktok.com ────────────────────────────────────────────────
+  //tiktok.com
   'tiktok.com': {
     tags: [
       'rtag-red|Chinese Ownership',
@@ -374,20 +355,20 @@ const KB = {
         { val: '30+',   label: 'Countries With Restrictions',  color: '#ff7c2a' },
       ],
       complaints: [
-        { icon: '👶', title: 'Children\'s accounts made public by default', count: 'EU documented',     period: '2023' },
-        { icon: '🔍', title: 'Journalists\' locations tracked by employees',count: 'Senate testimony',  period: '2023' },
-        { icon: '📋', title: 'Clipboard reading without disclosure',        count: 'Researcher found',  period: '2022' },
+        {title: 'Children\'s accounts made public by default', count: 'EU documented',     period: '2023' },
+        {title: 'Journalists\' locations tracked by employees',count: 'Senate testimony',  period: '2023' },
+        {title: 'Clipboard reading without disclosure',        count: 'Researcher found',  period: '2022' },
       ],
     },
     tech: [
       { raw: 'App read clipboard every 1–3 keystrokes (patched 2020, history documented)', type: 'Script',
         title: 'TikTok previously read your clipboard silently',
         explain: 'Security researchers confirmed TikTok\'s app was reading clipboard contents (including copied passwords) every few keystrokes. Apple\'s iOS 14 privacy alerts exposed this. It was patched, but the behavior was confirmed.',
-        risk: '⚠️ Patched in 2020 but established a documented pattern of covert data collection.' },
+        risk: 'Patched in 2020 but established a documented pattern of covert data collection.' },
       { raw: 'ByteDance servers: US (AWS) + Singapore + Beijing access confirmed', type: 'IP Route',
         title: 'US data was accessed from ByteDance offices in Beijing',
         explain: 'Despite US data being stored on US servers, internal investigation confirmed ByteDance engineers in China had accessed US user data, including specific individuals\' location data.',
-        risk: '🔴 Physical server location does not prevent access by Chinese-based employees.' },
+        risk: ' Physical server location does not prevent access by Chinese-based employees.' },
     ],
     alternatives: [
       { name: 'YouTube',  desc: 'US-based video platform with established privacy practices and GDPR compliance.',     why: 'US data jurisdiction, Google privacy controls',            score: 65 },
@@ -444,16 +425,16 @@ const KB = {
         { val: '4K+',    label: 'BBB Complaints',        color: '#ff7c2a' },
       ],
       complaints: [
-        { icon: '📦', title: 'Items not received or significantly delayed', count: '1,900+ reports', period: 'Last 12 months' },
-        { icon: '⚠️', title: 'Counterfeit or misrepresented products',      count: '1,200+ reports', period: 'Last 12 months' },
-        { icon: '💰', title: 'Refund denied or severely delayed',            count: '890 reports',    period: 'Last 12 months' },
+        {title: 'Items not received or significantly delayed', count: '1,900+ reports', period: 'Last 12 months' },
+        {title: 'Counterfeit or misrepresented products',      count: '1,200+ reports', period: 'Last 12 months' },
+        {title: 'Refund denied or severely delayed',            count: '890 reports',    period: 'Last 12 months' },
       ],
     },
     tech: [
       { raw: 'Data flows to Alibaba Cloud (Hangzhou, CN)', type: 'IP Route',
         title: 'Your data is stored on servers in China',
         explain: 'AliExpress is owned by Alibaba and stores data on Alibaba Cloud servers based in China. Chinese national security law requires companies to hand over data to authorities on request.',
-        risk: '⚠️ Data subject to Chinese government access without user notification.' },
+        risk: 'Data subject to Chinese government access without user notification.' },
     ],
     alternatives: [
       { name: 'Amazon', desc: 'US-based marketplace with strong buyer protections and fast shipping.', why: 'Better buyer protection, US data jurisdiction', score: 81 },
@@ -475,7 +456,7 @@ const KB = {
     },
   },
 
-  // ── google.com ────────────────────────────────────────────────
+  // google.com
   'google.com': {
     tags: [
       'rtag-orange|Extensive Data Collection',
@@ -511,18 +492,18 @@ const KB = {
         { val: '40',    label: 'States in Settlement',     color: '#ff7c2a' },
       ],
       complaints: [
-        { icon: '📍', title: 'Location tracked when disabled', count: '40-state documented', period: '2022 settlement' },
+        {title: 'Location tracked when disabled', count: '40-state documented', period: '2022 settlement' },
       ],
     },
     tech: [
       { raw: 'GA4 + DoubleClick + Google Tag Manager across ~85–95% of websites', type: 'Trackers',
         title: 'Google tracks you on virtually every website you visit',
         explain: 'Google Analytics runs on an estimated 85–95% of all websites. This means Google receives a report of your visit to almost every site, creating a near-complete map of your internet activity.',
-        risk: '⚠️ The most comprehensive web tracking system in existence.' },
+        risk: 'The most comprehensive web tracking system in existence.' },
       { raw: 'Location history retained even with "Location Off" setting (court-confirmed)', type: 'Data Practice',
         title: 'Turning off location did not stop Google from tracking it',
         explain: 'Court findings confirmed Google continued collecting precise location data even when users set devices to "Location History: Off" — confirmed deceptive by 40 states.',
-        risk: '🔴 Confirmed deceptive — $484M in settlements resulted.' },
+        risk: 'Confirmed deceptive — $484M in settlements resulted.' },
     ],
     alternatives: [
       { name: 'DuckDuckGo', desc: 'Private search engine. No tracking, no profiles, no ad targeting.', why: 'Zero search history collection',        score: 93 },
@@ -543,7 +524,7 @@ const KB = {
     },
   },
 
-  // ── twitter.com (X) ───────────────────────────────────────────
+  // ── twitter.com (X) 
   'twitter.com': {
     tags: [
       'rtag-orange|Multiple Breaches',
@@ -579,15 +560,15 @@ const KB = {
         { val: '200M',  label: 'Emails Leaked (2023)', color: '#ff4d6d' },
       ],
       complaints: [
-        { icon: '🔒', title: '2FA phone numbers used for advertising',   count: 'FTC documented',          period: '2023' },
-        { icon: '🔓', title: 'Account security degraded post-acquisition',count: 'Security researchers',   period: '2022–present' },
+        {title: '2FA phone numbers used for advertising',   count: 'FTC documented',          period: '2023' },
+        {title: 'Account security degraded post-acquisition',count: 'Security researchers',   period: '2022–present' },
       ],
     },
     tech: [
       { raw: 'Two-factor phone numbers routed to ad targeting pipeline', type: 'Data Misuse',
         title: 'Your security phone number was used to target you with ads',
         explain: 'Twitter collected phone numbers claiming they were for account security. The FTC confirmed these numbers were secretly used to build ad targeting profiles — a direct violation of a prior consent order.',
-        risk: '🔴 FTC confirmed this practice — resulted in a $150M fine.' },
+        risk: 'FTC confirmed this practice — resulted in a $150M fine.' },
     ],
     alternatives: [
       { name: 'Mastodon', desc: 'Decentralized, open-source microblogging. No ads, no data collection, community-run.', why: 'No corporate data collection, decentralized', score: 89 },
@@ -640,8 +621,8 @@ const KB = {
         { val: 'Low',     label: 'Fraud Rate',               color: '#00e5a0' },
       ],
       complaints: [
-        { icon: '🔒', title: 'Account access issues / locked accounts', count: 'Common',   period: 'Ongoing' },
-        { icon: '💰', title: 'Disputed transaction resolution delays',  count: 'Moderate', period: 'Ongoing' },
+        {title: 'Account access issues / locked accounts', count: 'Common',   period: 'Ongoing' },
+        {title: 'Disputed transaction resolution delays',  count: 'Moderate', period: 'Ongoing' },
       ],
     },
     tech: [
@@ -668,69 +649,4 @@ const KB = {
     },
   },
 
-}; // end KB
-
-/* ================================================================
-   TEMPLATE — copy this block to add a new site
-   ================================================================
-
-  'example.com': {
-    tags: [
-      'rtag-red|Label',       // red   = critical risk
-      'rtag-orange|Label',    // orange = high risk
-      'rtag-yellow|Label',    // yellow = moderate concern
-      'rtag-green|Label',     // green  = positive signal
-      'rtag-blue|Label',      // blue   = informational
-    ],
-    stats: { breaches: 0, records: '—', trackers: 0, shared: 0 },
-    timeline: [
-      { date: 'Mon YYYY', severity: 'critical|high|medium|low',
-        title: 'Event title', desc: 'Description.' },
-    ],
-    dataCollection: {
-      'Category': [ { label: 'Data type', risk: 'high|med|low' } ],
-    },
-    dataSharing: [
-      { name: 'Partner name', pct: 0, cat: 'Category' },
-    ],
-    ecom: {
-      isEcommerce: true,
-      scores: [
-        { val: '—', label: 'Label', color: '#f0a500' },
-      ],
-      complaints: [
-        { icon: '⚠️', title: 'Complaint type', count: '—', period: '—' },
-      ],
-    },
-    tech: [
-      { raw: 'technical detail', type: 'Tracker|Script|IP Route|Network Request|Fingerprinting',
-        title: 'Plain English title',
-        explain: 'Plain English explanation of what this means for the user.',
-        risk: '⚠️ Risk statement.' },
-    ],
-    alternatives: [
-      { name: 'Alternative', desc: 'What it is.', why: 'Why it is safer.', score: 80 },
-    ],
-    signals: {
-      breaches: [
-        { year: 2024, severity: 'critical|high|medium|low', recordsM: 0, financial: false },
-      ],
-      dataPartners: 0,
-      hasUnknownPartners: false,
-      isEcommerce: false,
-      refundRate: 80,        // only if isEcommerce: true
-      complaintsPerK: 0,     // only if isEcommerce: true
-      storesCardOnSite: false,
-      scamFlag: false,
-      trackerCount: 0,
-      routesThroughHighRiskJurisdiction: false,
-      fingerprinting: false,
-      aggressiveLocationRequest: false,
-      majorRegulatoryFine: false,
-      classActionLawsuit: false,
-      certifiedSOC2: false,
-      gdprCompliant: false,
-    },
-  },
-
-================================================================ */
+}; 
