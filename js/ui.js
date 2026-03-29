@@ -15,7 +15,7 @@
 
 let autoSave    = false;
 let currentSite = null;  
-let whitelist = JSON.parse(localStorage.getItem('sw_whitelist') || '["gmail.com","github.com"]');
+let whitelist = JSON.parse(localStorage.getItem('dc_whitelist') || '["gmail.com","github.com"]');
 
 
 
@@ -92,7 +92,7 @@ function removeWhitelistItem(site) {
 }
 
 function saveWhitelist() {
-  localStorage.setItem('sw_whitelist', JSON.stringify(whitelist));
+  localStorage.setItem('dc_whitelist', JSON.stringify(whitelist));
 }
 
 function renderWhitelistTags() {
